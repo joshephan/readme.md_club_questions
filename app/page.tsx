@@ -1,103 +1,210 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+import gsap from 'gsap';
+
+const bookQuestions = [
+  "📝 이 책에서 가장 인상 깊었던 문장은?",
+  "📚 읽으면서 떠오른 다른 책이나 경험이 있다면?",
+  "🤔 저자의 주장 중 동의하기 어려웠던 부분은?",
+  "✍️ 이 책을 한 문장으로 요약한다면?",
+  "👨‍💻 만약 내가 저자라면 어떤 내용을 추가하거나 뺐을까?",
+  "💼 실무에 바로 써먹을 수 있는 부분이 있었을까?",
+  "👥 이 책을 추천하고 싶은 개발자 유형은?",
+  "🛠️ 이 기술/패턴을 현재 업무에 어떻게 적용할 수 있을까?",
+  "⚡ 저자가 제안하는 방식이 실무에서 잘 통할까?",
+  "🔍 이 주제에 대해 다른 관점(예: 실제 현업 경험, 오픈소스 사례 등)이 있다면?",
+  "🎯 이 기술을 접하면서 생긴 시행착오나 에피소드가 있다면?",
+  "📖 비슷한 내용을 다룬 좋은 블로그나 강의가 있다면 소개?"
+];
+
+const selfIntroductionQuestions = [
+  "👋 자기소개를 해주세요",
+  "💻 어떤 개발자이고 싶으신가요?",
+  "🚀 앞으로의 목표나 계획이 있다면?",
+  "🎯 가장 자신있는 기술 스택은?",
+  "📚 최근에 읽은 책 중 인상 깊었던 책은?",
+  "🌟 개발자로서 가장 기억에 남는 순간은?",
+  "💡 개발하면서 가장 중요하게 생각하는 가치는?",
+  "🎨 개발 외에 관심있는 분야가 있나요?",
+  "🤝 협업할 때 중요하게 생각하는 것은?",
+  "📈 앞으로 배우고 싶은 기술이나 분야는?",
+  "🎮 개발 외에 즐기는 취미가 있다면?",
+  "💪 가장 자신있는 프로젝트나 경험은?"
+];
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [selectedQuestion, setSelectedQuestion] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<'book' | 'self'>('book');
+  const [showAllQuestions, setShowAllQuestions] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [hoveredQuestion, setHoveredQuestion] = useState<{ index: number; question: string } | null>(null);
+  const hoverRef = useRef<HTMLDivElement>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  useEffect(() => {
+    if (showAllQuestions && modalRef.current) {
+      gsap.fromTo(
+        modalRef.current,
+        { y: '100%', opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }
+      );
+    }
+  }, [showAllQuestions]);
+
+  const handleCloseModal = () => {
+    if (modalRef.current) {
+      gsap.to(modalRef.current, {
+        y: '100%',
+        opacity: 0,
+        duration: 0.3,
+        ease: 'power2.in',
+        onComplete: () => setShowAllQuestions(false)
+      });
+    } else {
+      setShowAllQuestions(false);
+    }
+  };
+
+  const getRandomQuestion = () => {
+    setIsLoading(true);
+    const questions = activeTab === 'book' ? bookQuestions : selfIntroductionQuestions;
+    const randomIndex = Math.floor(Math.random() * questions.length);
+    setSelectedQuestion(questions[randomIndex]);
+    setIsLoading(false);
+  };
+
+  const handleQuestionHover = (index: number, question: string) => {
+    if (hoverRef.current) {
+      gsap.killTweensOf(hoverRef.current);
+      setHoveredQuestion({ index, question });
+      gsap.fromTo(
+        hoverRef.current,
+        { scale: 1, opacity: 0 },
+        { scale: 1.1, opacity: 1, duration: 0.3, ease: 'power2.out' }
+      );
+    }
+  };
+
+  const handleQuestionLeave = () => {
+    if (hoverRef.current) {
+      gsap.to(hoverRef.current, {
+        scale: 1,
+        opacity: 0,
+        duration: 0.2,
+        ease: 'power2.in',
+        onComplete: () => setHoveredQuestion(null)
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 flex flex-col items-center justify-center p-4">
+      <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl p-8">
+        <h1 className="text-4xl font-bold mb-8 text-center text-indigo-800">READMD.MD 개발자 모임</h1>
+        
+        <div className="flex flex-col items-center gap-8">
+          <div className="flex gap-4 mb-4">
+            <button
+              onClick={() => setActiveTab('book')}
+              className={`px-6 py-2 rounded-lg font-semibold transition-all duration-300 ${
+                activeTab === 'book'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              📚 책 관련 질문
+            </button>
+            <button
+              onClick={() => setActiveTab('self')}
+              className={`px-6 py-2 rounded-lg font-semibold transition-all duration-300 ${
+                activeTab === 'self'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              👤 자기소개 질문
+            </button>
+          </div>
+
+          <div className="flex gap-4">
+            <button
+              onClick={getRandomQuestion}
+              disabled={isLoading}
+              className={`px-8 py-4 rounded-xl text-white font-semibold text-lg shadow-lg transition-all duration-300 ${
+                isLoading 
+                  ? 'bg-gray-400 cursor-not-allowed' 
+                  : 'bg-indigo-600 hover:bg-indigo-700 hover:scale-105'
+              }`}
+            >
+              {isLoading ? '질문 선택 중...' : '새 질문 선택하기'}
+            </button>
+
+            <button
+              onClick={() => setShowAllQuestions(true)}
+              className="px-8 py-4 rounded-xl text-indigo-600 font-semibold text-lg shadow-lg transition-all duration-300 bg-white hover:bg-gray-50 hover:scale-105"
+            >
+              질문 전체 보기
+            </button>
+          </div>
+
+          {selectedQuestion && (
+            <div className="w-full max-w-2xl p-8 bg-indigo-50 rounded-xl shadow-lg">
+              <h2 className="text-2xl font-semibold mb-4 text-indigo-800">선택된 질문:</h2>
+              <p className="text-gray-700 text-3xl font-bold">{selectedQuestion}</p>
+            </div>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+
+      {showAllQuestions && (
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <div 
+            ref={modalRef}
+            className="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full max-h-[80vh] flex flex-col"
+          >
+            <div className="flex justify-between items-center mb-6 flex-shrink-0">
+              <h2 className="text-2xl font-bold text-indigo-800">
+                {activeTab === 'book' ? '📚 책 관련 질문' : '👤 자기소개 질문'}
+              </h2>
+              <button
+                onClick={handleCloseModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-4 overflow-y-auto overflow-x-hidden flex-grow">
+              {(activeTab === 'book' ? bookQuestions : selfIntroductionQuestions).map((question, index) => (
+                <div
+                  key={index}
+                  className="p-4 bg-indigo-50 rounded-lg cursor-pointer"
+                  onMouseEnter={() => handleQuestionHover(index, question)}
+                  onMouseLeave={handleQuestionLeave}
+                >
+                  <p className="text-gray-700">{question}</p>
+                </div>
+              ))}
+            </div>
+
+            {hoveredQuestion && (
+              <div
+                ref={hoverRef}
+                className="fixed pointer-events-none z-[100]"
+                style={{
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                <div className="p-4 bg-indigo-100 rounded-lg shadow-lg">
+                  <p className="text-gray-700 text-lg">{hoveredQuestion.question}</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
