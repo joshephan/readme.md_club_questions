@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "READMD.MD 개발자 모임",
-  description: "READMD.MD 개발자 모임 질문 생성기",
+  title: "README.MD 개발자 모임",
+  description: "README.MD 개발자 모임 질문 생성기",
 };
 
 export default function RootLayout({

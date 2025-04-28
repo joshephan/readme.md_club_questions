@@ -101,7 +101,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-purple-100 flex flex-col items-center justify-center p-4">
       <div className="max-w-4xl w-full bg-white rounded-2xl shadow-xl p-8">
-        <h1 className="text-4xl font-bold mb-8 text-center text-indigo-800">READMD.MD 개발자 모임</h1>
+        <h1 className="text-4xl font-bold mb-8 text-center text-indigo-800">README.MD 개발자 모임</h1>
         
         <div className="flex flex-col items-center gap-8">
           <div className="flex gap-4 mb-4">
