@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import gsap from 'gsap';
+import Link from 'next/link';
 
 const bookQuestions = [
   "📝 이 책에서 가장 인상 깊었던 문장은?",
@@ -174,6 +175,13 @@ export default function Home() {
             >
               질문 전체 보기
             </button>
+
+            <Link
+              href="/schedule"
+              className="px-8 py-4 rounded-xl text-indigo-600 font-semibold text-lg shadow-lg transition-all duration-300 bg-white hover:bg-gray-50 hover:scale-105"
+            >
+              진행 순서 보기
+            </Link>
           </div>
 
           {selectedQuestion && (
