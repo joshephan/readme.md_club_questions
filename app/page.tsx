@@ -33,10 +33,25 @@ const selfIntroductionQuestions = [
   "💪 가장 자신있는 프로젝트나 경험은?"
 ];
 
+const etcQuestions = [
+  "🍔 가장 좋아하는 맛집을 한 곳 추천해주세요!",
+  "🎮 최근에 즐기고 있는 게임이 있다면?", // 롤토체스
+  "🎵 개발할 때 듣는 플레이리스트가 있다면?",
+  "☕ 가장 좋아하는 카페는 어디인가요?", // 이태원: 맥심 플랜트
+  "🏃‍♂️ 개발 외에 즐기는 운동이 있다면?",
+  "🎬 최근에 본 영화 중 인상 깊었던 작품은?",
+  "🌍 여행하고 싶은 나라가 있다면?", // 아이슬란드 + 스코틀랜드
+  "🎸 개발 외에 배우고 싶은 취미가 있다면?",
+  "🍳 요리할 때 가장 자신있는 메뉴는?", // 김치 볶음밥 + 고로케
+  "📺 최근에 본 드라마 중 추천하고 싶은 작품은?",
+  "🎨 개발 외에 창작 활동을 한다면?",
+  "🏠 가장 좋아하는 휴식 방법은?"
+];
+
 export default function Home() {
   const [selectedQuestion, setSelectedQuestion] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'book' | 'self'>('book');
+  const [activeTab, setActiveTab] = useState<'book' | 'self' | 'etc'>('book');
   const [showAllQuestions, setShowAllQuestions] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const [hoveredQuestion, setHoveredQuestion] = useState<{ index: number; question: string } | null>(null);
@@ -68,7 +83,10 @@ export default function Home() {
 
   const getRandomQuestion = () => {
     setIsLoading(true);
-    const questions = activeTab === 'book' ? bookQuestions : selfIntroductionQuestions;
+    const questions = 
+      activeTab === 'book' ? bookQuestions : 
+      activeTab === 'self' ? selfIntroductionQuestions : 
+      etcQuestions;
     const randomIndex = Math.floor(Math.random() * questions.length);
     setSelectedQuestion(questions[randomIndex]);
     setIsLoading(false);
@@ -125,6 +143,16 @@ export default function Home() {
             >
               👤 자기소개 질문
             </button>
+            <button
+              onClick={() => setActiveTab('etc')}
+              className={`px-6 py-2 rounded-lg font-semibold transition-all duration-300 ${
+                activeTab === 'etc'
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              🎯 기타 질문
+            </button>
           </div>
 
           <div className="flex gap-4">
@@ -165,7 +193,7 @@ export default function Home() {
           >
             <div className="flex justify-between items-center mb-6 flex-shrink-0">
               <h2 className="text-2xl font-bold text-indigo-800">
-                {activeTab === 'book' ? '📚 책 관련 질문' : '👤 자기소개 질문'}
+                {activeTab === 'book' ? '📚 책 관련 질문' : activeTab === 'self' ? '👤 자기소개 질문' : '🎯 기타 질문'}
               </h2>
               <button
                 onClick={handleCloseModal}
@@ -175,7 +203,9 @@ export default function Home() {
               </button>
             </div>
             <div className="space-y-4 overflow-y-auto overflow-x-hidden flex-grow">
-              {(activeTab === 'book' ? bookQuestions : selfIntroductionQuestions).map((question, index) => (
+              {(activeTab === 'book' ? bookQuestions : 
+                activeTab === 'self' ? selfIntroductionQuestions : 
+                etcQuestions).map((question, index) => (
                 <div
                   key={index}
                   className="p-4 bg-indigo-50 rounded-lg cursor-pointer"
